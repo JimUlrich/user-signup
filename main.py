@@ -59,11 +59,23 @@ class MainHandler(webapp2.RequestHandler):
             return EMAIL_RE.match(email)
 
         x = "valid"
+        y = "valid"
+        z = "valid"
+        a = "valid"
 
         if not valid_username(username):
             x = "not vaild"
 
-        self.response.write(x)
+        if not valid_password(password):
+            y = "not valid"
+
+        if verify != password:
+            a = "not valid"
+
+        if not valid_email(email):
+            z = "not valid"
+
+        self.response.write(x + y + a + z)
 
 
 
