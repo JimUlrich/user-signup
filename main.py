@@ -84,6 +84,8 @@ class MainHandler(webapp2.RequestHandler):
         verify_error = ''
         email_error = ''
         error_tag = ''
+        user_param = ''
+        email_param = ''
 
         if not valid_username(username):
             user_error= "Username is not valid"
@@ -107,16 +109,23 @@ class MainHandler(webapp2.RequestHandler):
             email = ''
 
         form = build_form(user_error, pass_error, verify_error, email_error, user_param, email_param)
+
         if error_tag == "x":
             self.response.write(page_header + header + form + page_footer)
+        else:
+            self.redirect("/Welcome?username=" + username)
 
-#class Welcome(webapp2.RequestHandler):
+class Welcome(webapp2.RequestHandler):
 
+    def get(self):
 
+        username = self.request.get("username")
+        content = "<h1>Welcome, " + username + "!</h1>"
 
-
+        self.response.write(page_header + content + page_footer)
 
 
 app = webapp2.WSGIApplication([
-    ('/', MainHandler)
+    ('/', MainHandler),
+    ('/Welcome', Welcome),
 ], debug=True)
