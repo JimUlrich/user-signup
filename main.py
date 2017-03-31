@@ -2,42 +2,58 @@ import webapp2
 import cgi
 import re
 
-#def build_form():
+page_header = """
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User Signup</title>
+    <style type="text/css">
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+"""
 
+def build_form(user_error='', pass_error='', verify_error='', email_error=''):
+    form = """
+    <form method='post'>
+        <table><tbody>
+        <tr><td>
+        <label>Username</label></td>
+        <td><input name='username' type='text' value required>
+        </td><td><span class="error">{0}</span></td></tr>
+
+        <tr><td>
+        <label>Password</label></td>
+        <td><input name='password' type='password' value required>
+        </td><td><span class="error">{1}</span></td></tr>
+
+        <tr><td>
+        <label>Verify Password</label></td>
+        <td><input name='verify' type='password' value required>
+        </td><td><span class="error">{2}</span></td></tr>
+
+        <tr><td>
+        <label>Email (optional)</label></td>
+        <td><input name='email' type='text'>
+        </td><td><span class="error">{3}</span></td></tr>
+
+        </tbody></table>
+        <input type='submit'>
+    </form>
+        """.format(user_error, pass_error, verify_error, email_error)
+    return form
+
+
+header = "<h1>Signup</h1>"
 
 class MainHandler(webapp2.RequestHandler):
     def get(self):
-        header = "<h1>Signup</h1>"
-        form = """
-        <form method='post'>
-            <table><tbody>
-            <tr><td>
-            <label>Username</label></td>
-            <td><input name='username' type='text' value required>
-            </td></tr>
 
-            <tr><td>
-            <label>Password</label></td>
-            <td><input name='password' type='password' value required>
-            </td></tr>
-
-            <tr><td>
-            <label>Verify Password</label></td>
-            <td><input name='verify' type='password' value required>
-            </td></tr>
-
-            <tr><td>
-            <label>Email (optional)</label></td>
-            <td><input name='email' type='text'>
-            </td></tr>
-
-            </tbody></table>
-            <input type='submit'>
-        </form>
-            """
-    #def write_form(self)
-
-        self.response.write(header + form)
+        form = build_form()
+        self.response.write(page_header + header + form)
 
     def post(self):
 
@@ -58,24 +74,23 @@ class MainHandler(webapp2.RequestHandler):
         def valid_email(email):
             return EMAIL_RE.match(email)
 
-        x = "valid"
-        y = "valid"
-        z = "valid"
-        a = "valid"
+        user_error = ''
+        pass_error = ''
+        verify_error = ''
+        email_error = ''
 
         if not valid_username(username):
-            x = "not vaild"
-
+            user_error= "Username is not valid"
         if not valid_password(password):
-            y = "not valid"
-
+            pass_error= "Password is not vaild"
         if verify != password:
-            a = "not valid"
+            verify_error = "Passwords do not match"
+        if email and not valid_email(email):
+            email_error =  "Email address is not valid"
 
-        if not valid_email(email):
-            z = "not valid"
+        form = build_form(user_error, pass_error, verify_error, email_error)
 
-        self.response.write(x + y + a + z)
+        self.response.write(page_header + header + form)
 
 
 
