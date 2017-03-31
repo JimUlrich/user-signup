@@ -16,13 +16,18 @@ page_header = """
 <body>
 """
 
-def build_form(user_error='', pass_error='', verify_error='', email_error=''):
+page_footer = """
+</body>
+</html>
+"""
+
+def build_form(user_error='', pass_error='', verify_error='', email_error='', user_param='', email_param=''):
     form = """
     <form method='post'>
         <table><tbody>
         <tr><td>
         <label>Username</label></td>
-        <td><input name='username' type='text' value required>
+        <td><input name='username' type='text' value='{4}' required>
         </td><td><span class="error">{0}</span></td></tr>
 
         <tr><td>
@@ -37,13 +42,13 @@ def build_form(user_error='', pass_error='', verify_error='', email_error=''):
 
         <tr><td>
         <label>Email (optional)</label></td>
-        <td><input name='email' type='text'>
+        <td><input name='email' type='text' value='{5}'>
         </td><td><span class="error">{3}</span></td></tr>
 
         </tbody></table>
         <input type='submit'>
     </form>
-        """.format(user_error, pass_error, verify_error, email_error)
+        """.format(user_error, pass_error, verify_error, email_error, user_param, email_param)
     return form
 
 
@@ -53,7 +58,7 @@ class MainHandler(webapp2.RequestHandler):
     def get(self):
 
         form = build_form()
-        self.response.write(page_header + header + form)
+        self.response.write(page_header + header + form + page_footer)
 
     def post(self):
 
@@ -70,7 +75,7 @@ class MainHandler(webapp2.RequestHandler):
         def valid_password(password):
             return PASS_RE.match(password)
 
-        EMAIL_RE = re.compile(r"^[\S]+@[\S]+.[\S]+$")
+        EMAIL_RE = re.compile(r"^[\S]+@[\S]+\.[\S]+$")
         def valid_email(email):
             return EMAIL_RE.match(email)
 
@@ -78,19 +83,35 @@ class MainHandler(webapp2.RequestHandler):
         pass_error = ''
         verify_error = ''
         email_error = ''
+        error_tag = ''
 
         if not valid_username(username):
             user_error= "Username is not valid"
+            error_tag = "x"
+            username = ''
+            email_param = email
         if not valid_password(password):
             pass_error= "Password is not vaild"
+            error_tag = "x"
+            user_param = username
+            email_param = email
         if verify != password:
             verify_error = "Passwords do not match"
+            error_tag = "x"
+            user_param = username
+            email_param = email
         if email and not valid_email(email):
             email_error =  "Email address is not valid"
+            error_tag = "x"
+            user_param = username
+            email = ''
 
-        form = build_form(user_error, pass_error, verify_error, email_error)
+        form = build_form(user_error, pass_error, verify_error, email_error, user_param, email_param)
+        if error_tag == "x":
+            self.response.write(page_header + header + form + page_footer)
 
-        self.response.write(page_header + header + form)
+#class Welcome(webapp2.RequestHandler):
+
 
 
 
